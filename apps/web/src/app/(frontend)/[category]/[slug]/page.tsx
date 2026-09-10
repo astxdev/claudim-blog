@@ -9,6 +9,7 @@ import { AdSlot } from '../../_components/AdSlot'
 import { MembersGate } from '../../_components/MembersGate'
 import { getActiveAd, getArticleBySlug } from '@/lib/queries'
 import { isPopulated } from '@/lib/relations'
+import { resolveMediaUrl } from '@/lib/cms-client'
 import { formatPublishedDate } from '@/lib/format'
 import { estimateReadingTimeMinutes } from '@/lib/reading-time'
 
@@ -35,7 +36,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const category = isPopulated(article.category) ? article.category : null
-  const heroImage = isPopulated(article.heroImage) ? article.heroImage : null
+  const heroImageSource = isPopulated(article.heroImage) ? article.heroImage : null
+  const heroImageUrl = resolveMediaUrl(heroImageSource?.url)
+  const heroImage = heroImageSource && heroImageUrl ? { ...heroImageSource, url: heroImageUrl } : null
   const authors = article.authors.filter(isPopulated)
   const readingTime = estimateReadingTimeMinutes(article.body)
   const inlineAd = await getActiveAd('article-inline')
@@ -64,7 +67,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <ShareBar url={shareUrl} title={article.title} />
       </div>
 
-      {heroImage?.url && (
+      {heroImage && (
         <Image
           src={heroImage.url}
           alt={heroImage.alt}

@@ -19,9 +19,13 @@ TypeScript (as "collections"), não numa interface visual. Isso significa que:
 - O schema do conteúdo (`Articles`, `Categories`, `Authors`...) vive versionado
   no seu repositório, em `apps/web/src/collections/`.
 - Você pode consultar o conteúdo de duas formas: a **Local API**
-  (`payload.find(...)`, usada direto dentro de Server Components — sem round-trip
-  de rede, é só uma chamada de função) ou a **API REST/GraphQL** (para um
-  cliente externo, ex. um app mobile).
+  (`payload.find(...)`, usada quando o código que consulta roda no mesmo
+  processo do Payload — sem round-trip de rede) ou a **API REST/GraphQL**
+  (para um cliente externo, ex. um app mobile, ou — como é o nosso caso em
+  produção — um frontend hospedado em outro lugar).
+
+> **Importante neste projeto**: em produção, o mesmo código de
+> `apps/web` roda em **dois lugares diferentes** — veja a seção 5.
 
 ## 2. Como este projeto está organizado
 
@@ -44,8 +48,9 @@ Payload. Isso significa que essas regras podem ser testadas e reaproveitadas
 sem subir um banco de dados.
 
 O frontend (`apps/web/src/app/(frontend)/`) lê o conteúdo através de
-`apps/web/src/lib/queries.ts`, que usa a Local API do Payload
-(`payload.find`, `payload.create`).
+`apps/web/src/lib/queries.ts`, que por sua vez usa `apps/web/src/lib/cms-client.ts`
+— um cliente HTTP para a API REST do Payload, apontando para a URL definida em
+`PAYLOAD_CMS_URL`. Nenhuma página do frontend fala com o Postgres diretamente.
 
 ## 3. Rodando localmente
 
@@ -109,34 +114,75 @@ pnpm --filter @claudim/web payload migrate
 Outros comandos úteis: `migrate:status` (o que já rodou), `migrate:down`
 (desfaz a última), `migrate:fresh` (recria o banco do zero — só em dev).
 
-## 5. Deploy
+## 5. Deploy — arquitetura escolhida: CMS na VPS, frontend na Vercel
 
-Duas opções, ambas compatíveis com o que já existe no projeto:
+Diferente do "tudo num só lugar" do desenvolvimento local, em produção o
+mesmo código de `apps/web` roda em **dois deploys separados** do mesmo
+repositório, cada um com um papel:
 
-### Opção A — Vercel + Postgres gerenciado (recomendado para começar)
+```
+┌────────────────────────┐        API REST         ┌──────────────────────────┐
+│  cms.claudim.com (VPS)  │ ◄──────────────────────  │  blog.claudim.com (Vercel) │
+│  apps/web + Postgres    │   fetch() server-side    │  apps/web (frontend)     │
+│  = o CMS de verdade     │                          │  PAYLOAD_CMS_URL=cms...  │
+│  admin em /admin        │                          │  sem DATABASE_URL        │
+└────────────────────────┘                          └──────────────────────────┘
+```
 
-1. Crie um banco Postgres gerenciado (Neon ou Supabase têm plano gratuito) e
-   copie a connection string.
-2. Importe o repositório na Vercel, apontando o **root directory** para
-   `apps/web` (é um monorepo pnpm — a Vercel detecta workspaces automaticamente).
-3. Configure as variáveis de ambiente do projeto na Vercel:
-   - `DATABASE_URL` → a connection string do banco gerenciado
-   - `PAYLOAD_SECRET` → uma string aleatória longa (gere com
-     `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`,
-     nunca reaproveite a do `.env` local)
-4. Antes do primeiro deploy, rode `pnpm --filter @claudim/web payload migrate`
-   apontando `DATABASE_URL` para o banco de produção (rode local, uma vez, ou
-   como um passo de build).
-5. Deploy. Acesse `/admin` no domínio de produção para criar o primeiro
-   usuário admin de produção.
+- **VPS (`cms.claudim.com`)**: roda o app completo — Payload, Postgres,
+  admin, collections, migrations. É aqui que a equipe edita conteúdo
+  (`/admin`) e que o banco de dados vive de verdade. Tem `DATABASE_URL` e
+  `PAYLOAD_SECRET`.
+- **Vercel (`blog.claudim.com`)**: roda o mesmo código, mas só usa as páginas
+  do frontend. Elas buscam conteúdo pela API REST do Payload da VPS (variável
+  `PAYLOAD_CMS_URL=https://cms.claudim.com`), nunca acessam o Postgres
+  diretamente e **não precisam de `DATABASE_URL`**.
 
-### Opção B — Self-host com Docker
+Por isso as páginas do frontend (`page.tsx`, `[category]/page.tsx`,
+`[category]/[slug]/page.tsx`, e o `layout.tsx`) têm
+`export const dynamic = 'force-dynamic'` — elas nunca tentam buscar conteúdo
+durante o *build* da Vercel (que não pode depender da VPS estar de pé
+naquele momento), só em tempo de requisição.
 
-O `docker-compose.yml` na raiz já sobe o Postgres; para produção você
-adicionaria um segundo serviço para a própria aplicação Next.js (`apps/web`,
-buildada com `pnpm build` e servida com `pnpm start`), com as mesmas variáveis
-de ambiente do passo anterior. Essa rota dá mais controle, mas exige que você
-mesmo cuide de HTTPS, backups do Postgres e deploy contínuo.
+### Colocando a VPS no ar
+
+1. Suba o Postgres (Docker, como já está em `docker-compose.yml`) e o próprio
+   app (`pnpm build && pnpm start`, ou via Docker/PM2) apontando pro
+   `DATABASE_URL` local dessa VPS.
+2. Rode a migration nessa máquina: `pnpm --filter @claudim/web payload migrate`.
+3. Configure um proxy reverso (nginx/Caddy) com HTTPS pra `cms.claudim.com`
+   apontando pra porta do app.
+4. Acesse `https://cms.claudim.com/admin` e crie o primeiro usuário — esse é
+   o login da equipe editorial.
+5. **Segurança do Postgres exposto à internet** (a Vercel não tem IP fixo de
+   saída, então não dá pra restringir por IP): usuário dedicado com permissão
+   só no banco do Claudim (nunca o superusuário), senha forte, `hostssl` no
+   `pg_hba.conf` (TLS obrigatório), e considere `fail2ban` pra bloquear
+   tentativas de força bruta.
+
+### Colocando a Vercel no ar
+
+1. Projeto na Vercel com **root directory** `apps/web` (monorepo pnpm —
+   detectado automaticamente).
+2. Variáveis de ambiente do projeto (Production):
+   - `PAYLOAD_CMS_URL` → `https://cms.claudim.com`
+   - `PAYLOAD_SECRET` → só é necessário porque o `payload.config.ts` é
+     importado pelo bundle; não precisa ser o mesmo da VPS, e nenhuma rota
+     do frontend chega a usá-lo de fato.
+   - **Não configure `DATABASE_URL` aqui** — a Vercel nunca deve ter acesso
+     direto ao banco.
+3. Deploy. O domínio customizado (`blog.claudim.com`) só pode ser anexado ao
+   projeto **depois** do primeiro deploy funcionar (a Vercel bloqueia anexar
+   domínio a um projeto sem deploy de produção bem-sucedido).
+
+### Alternativa mais simples (sem VPS)
+
+Se um dia quiser simplificar e abrir mão do controle total sobre a
+infraestrutura, dá pra rodar o app inteiro (CMS + frontend juntos) só na
+Vercel, com um Postgres gerenciado (Neon/Supabase) — nesse caso
+`PAYLOAD_CMS_URL` nem precisaria existir (o app usaria a Local API
+novamente, como em desenvolvimento). Foi o caminho considerado antes de optar
+pela VPS.
 
 ## 6. Referência rápida de comandos
 
@@ -150,3 +196,6 @@ mesmo cuide de HTTPS, backups do Postgres e deploy contínuo.
 | `pnpm --filter @claudim/web payload migrate` | aplica migrations pendentes (produção) |
 | `pnpm typecheck` | checa tipos em todos os pacotes do monorepo |
 | `pnpm build` | build de produção do Next.js |
+
+`PAYLOAD_CMS_URL` (em `.env`): de onde o frontend busca conteúdo. Em dev,
+`http://localhost:3000` (este mesmo app). Na Vercel, `https://cms.claudim.com`.

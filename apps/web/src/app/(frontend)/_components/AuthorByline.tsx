@@ -1,17 +1,19 @@
 import Image from 'next/image'
 import type { Author } from '@/payload-types'
 import { isPopulated } from '@/lib/relations'
+import { resolveMediaUrl } from '@/lib/cms-client'
 
 export function AuthorByline({ authors }: { authors: Author[] }) {
   return (
     <div className="flex flex-wrap items-center gap-4">
       {authors.map((author) => {
         const avatar = isPopulated(author.avatar) ? author.avatar : null
+        const avatarUrl = resolveMediaUrl(avatar?.url)
         return (
           <div key={author.id} className="flex items-center gap-2.5">
-            {avatar?.url ? (
+            {avatar && avatarUrl ? (
               <Image
-                src={avatar.url}
+                src={avatarUrl}
                 alt={avatar.alt}
                 width={36}
                 height={36}

@@ -1,6 +1,13 @@
 import type { CollectionConfig } from 'payload'
 import { ValidationError } from 'payload'
-import { INTEREST_AREAS, describeSubscriberValidationError, validateSubscriberInput } from '@claudim/core'
+import {
+  INTEREST_AREAS,
+  createSubscriberRegisteredEvent,
+  describeSubscriberValidationError,
+  isInterestArea,
+  validateSubscriberInput,
+} from '@claudim/core'
+import { handleSubscriberRegistered } from '@claudim/infra'
 
 export const NewsletterSubscribers: CollectionConfig = {
   slug: 'newsletter-subscribers',
@@ -73,6 +80,19 @@ export const NewsletterSubscribers: CollectionConfig = {
         data.interests = result.value.interests
 
         return data
+      },
+    ],
+    afterChange: [
+      async ({ doc, operation }) => {
+        if (operation !== 'create') return
+
+        await handleSubscriberRegistered(
+          createSubscriberRegisteredEvent({
+            name: doc.name,
+            email: doc.email,
+            interests: (Array.isArray(doc.interests) ? doc.interests : []).filter(isInterestArea),
+          }),
+        )
       },
     ],
   },

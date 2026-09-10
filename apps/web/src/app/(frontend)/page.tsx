@@ -2,6 +2,7 @@ import { ArticleCard } from './_components/ArticleCard'
 import { AdSlot } from './_components/AdSlot'
 import { getActiveAd, getFeaturedArticle, getLatestArticles } from '@/lib/queries'
 
+
 export default async function HomePage() {
   const featured = await getFeaturedArticle()
   const [latest, homeAd, sidebarAd] = await Promise.all([

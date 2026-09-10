@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Article } from '@/payload-types'
 import { isPopulated } from '@/lib/relations'
+import { resolveMediaUrl } from '@/lib/cms-client'
 import { formatPublishedDate } from '@/lib/format'
 import { estimateReadingTimeMinutes } from '@/lib/reading-time'
 import { CategoryBadge } from './CategoryBadge'
@@ -13,7 +14,9 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) {
   const category = isPopulated(article.category) ? article.category : null
-  const heroImage = isPopulated(article.heroImage) ? article.heroImage : null
+  const heroImageSource = isPopulated(article.heroImage) ? article.heroImage : null
+  const heroImageUrl = resolveMediaUrl(heroImageSource?.url)
+  const heroImage = heroImageSource && heroImageUrl ? { ...heroImageSource, url: heroImageUrl } : null
   const readingTime = estimateReadingTimeMinutes(article.body)
   const href = category ? `/${category.slug}/${article.slug}` : '#'
   const badge = category && (
@@ -38,7 +41,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
     return (
       <article>
         <Link href={href} className="group block">
-          {heroImage?.url && (
+          {heroImage && (
             <Image
               src={heroImage.url}
               alt={heroImage.alt}
@@ -78,7 +81,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
             </p>
           </div>
-          {heroImage?.url && (
+          {heroImage && (
             <Image
               src={heroImage.url}
               alt={heroImage.alt}
@@ -95,7 +98,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   return (
     <article className="flex flex-col">
       <Link href={href} className="group flex flex-col gap-3 sm:flex-row sm:gap-5">
-        {heroImage?.url && (
+        {heroImage && (
           <div className="sm:w-2/5 sm:flex-shrink-0">
             <Image
               src={heroImage.url}

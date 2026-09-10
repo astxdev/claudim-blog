@@ -20,6 +20,10 @@ const sourceSerif = Source_Serif_4({
   display: 'swap',
 })
 
+// Renderiza tudo sob demanda (não no build): o conteúdo vem de um Payload
+// remoto (a VPS), que não precisa estar de pé no momento do build da Vercel.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: {
     default: 'Claudim — Inteligência aplicada aos negócios',

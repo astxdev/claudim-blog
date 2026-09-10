@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import type { Ad } from '@/payload-types'
 import { isPopulated } from '@/lib/relations'
+import { resolveMediaUrl } from '@/lib/cms-client'
 
 /**
  * Faixa no topo da página, acima do cabeçalho — o espaço reservado para
@@ -10,14 +11,15 @@ import { isPopulated } from '@/lib/relations'
  */
 export function TopBanner({ ad }: { ad: Ad | null }) {
   const adImage = ad && isPopulated(ad.image) ? ad.image : null
+  const adImageUrl = resolveMediaUrl(adImage?.url)
 
-  if (ad && adImage?.url) {
+  if (ad && adImage && adImageUrl) {
     return (
       <div className="bg-surface border-border border-b py-2 text-center">
         <p className="text-ink-muted mb-2 text-[0.65rem] uppercase tracking-widest">Publicidade</p>
         <a href={ad.url} target="_blank" rel="noopener noreferrer sponsored" className="mx-auto block max-w-4xl px-6">
           <Image
-            src={adImage.url}
+            src={adImageUrl}
             alt={adImage.alt}
             width={adImage.width ?? 1200}
             height={adImage.height ?? 150}
