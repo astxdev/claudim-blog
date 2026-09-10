@@ -1,0 +1,11 @@
+{
+  "name": "claudim-blog",
+  "private": true,
+  "packageManager": "pnpm@10.34.3",
+  "scripts": {
+    "dev": "pnpm --filter @claudim/web dev",
+    "build": "pnpm --filter @claudim/web build",
+    "typecheck": "pnpm -r typecheck",
+    "seed": "pnpm --filter @claudim/web seed"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.next/
+.turbo/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+*.log
+references/
+.playwright-mcp/
+.claude/scheduled_tasks.lock
+branding/twitter-cover-extracted/

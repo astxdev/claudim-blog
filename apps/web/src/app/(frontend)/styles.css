@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+/**
+ * Design tokens da marca Claudim — extraídos de branding/ (logos, hero,
+ * moodboard de social media) por conta-gotas, com contraste verificado
+ * contra WCAG AA (ver docs/payload-guide.md → seção "Sistema de design").
+ */
+@theme {
+  --font-serif: var(--font-source-serif), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --color-ink: #004039;
+  --color-ink-muted: #4f5e5b;
+  --color-ink-inverse: #f2efe7;
+
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-border: #e2e2de;
+
+  --color-accent: #ee7e14;
+  --color-accent-strong: #a6580d;
+
+  --color-members: #6a3f9e;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  /* Corpo editorial: largura de leitura confortável e respiro entre linhas */
+  .prose-article {
+    max-width: 70ch;
+    font-size: 1.1875rem;
+    line-height: 1.75;
+  }
+
+  .prose-article p + p {
+    margin-top: 1.5em;
+  }
+
+  .prose-article h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5em;
+    line-height: 1.25;
+    margin-top: 2em;
+    margin-bottom: 0.6em;
+  }
+
+  .kicker {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .headline {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+}

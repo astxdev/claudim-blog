@@ -1,0 +1,105 @@
+import { notFound } from 'next/navigation'
+import Image from 'next/image'
+import type { Metadata } from 'next'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+import { AuthorByline } from '../../_components/AuthorByline'
+import { CategoryBadge } from '../../_components/CategoryBadge'
+import { ShareBar } from '../../_components/ShareBar'
+import { AdSlot } from '../../_components/AdSlot'
+import { MembersGate } from '../../_components/MembersGate'
+import { getActiveAd, getArticleBySlug } from '@/lib/queries'
+import { isPopulated } from '@/lib/relations'
+import { formatPublishedDate } from '@/lib/format'
+import { estimateReadingTimeMinutes } from '@/lib/reading-time'
+
+interface ArticlePageProps {
+  params: Promise<{ category: string; slug: string }>
+}
+
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params
+  const article = await getArticleBySlug(slug)
+  if (!article) return { title: 'Matéria não encontrada' }
+  return {
+    title: article.seo?.title || article.title,
+    description: article.seo?.description || article.excerpt,
+  }
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params
+  const article = await getArticleBySlug(slug)
+
+  if (!article) {
+    notFound()
+  }
+
+  const category = isPopulated(article.category) ? article.category : null
+  const heroImage = isPopulated(article.heroImage) ? article.heroImage : null
+  const authors = article.authors.filter(isPopulated)
+  const readingTime = estimateReadingTimeMinutes(article.body)
+  const inlineAd = await getActiveAd('article-inline')
+
+  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudim.com.br'}/${category?.slug ?? ''}/${article.slug}`
+
+  return (
+    <article className="mx-auto max-w-6xl px-6 py-8">
+      <header className="mx-auto max-w-3xl text-center">
+        {category && (
+          <div className="flex justify-center">
+            <CategoryBadge title={category.title} slug={category.slug} accentColor={category.accentColor} />
+          </div>
+        )}
+        <h1 className="headline mt-3 text-3xl font-semibold text-ink sm:text-5xl">{article.title}</h1>
+        {article.dek && <p className="text-ink-muted mt-4 text-lg sm:text-xl">{article.dek}</p>}
+        <div className="mt-6 flex justify-center">
+          <AuthorByline authors={authors} />
+        </div>
+        <p className="text-ink-muted mt-2 text-sm">
+          {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
+        </p>
+      </header>
+
+      <div className="mx-auto mt-4 max-w-3xl md:hidden">
+        <ShareBar url={shareUrl} title={article.title} />
+      </div>
+
+      {heroImage?.url && (
+        <Image
+          src={heroImage.url}
+          alt={heroImage.alt}
+          width={heroImage.width ?? 1600}
+          height={heroImage.height ?? 900}
+          priority
+          className="mx-auto mt-8 aspect-[16/9] w-full max-w-4xl rounded-2xl object-cover"
+        />
+      )}
+
+      <div className="mx-auto mt-10 grid max-w-4xl gap-10 md:grid-cols-[3rem_1fr] lg:max-w-none lg:grid-cols-[3rem_minmax(0,44rem)_16rem] lg:gap-12">
+        <div className="hidden md:block">
+          <div className="sticky top-28">
+            <ShareBar url={shareUrl} title={article.title} orientation="vertical" />
+          </div>
+        </div>
+
+        <div className="mx-auto w-full max-w-3xl lg:mx-0">
+          <MembersGate accessLevel={article.accessLevel} excerpt={article.excerpt}>
+            <div className="prose-article">
+              <RichText data={article.body} />
+            </div>
+          </MembersGate>
+        </div>
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-28">
+            <AdSlot ad={inlineAd} />
+          </div>
+        </aside>
+      </div>
+
+      <div className="mx-auto mt-10 max-w-3xl lg:hidden">
+        <AdSlot ad={inlineAd} />
+      </div>
+    </article>
+  )
+}

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: claudim
+      POSTGRES_PASSWORD: claudim
+      POSTGRES_DB: claudim_blog
+    ports:
+      # 5433 no host — a porta 5432 já está em uso por um Postgres nativo nesta máquina.
+      - "5433:5432"
+    volumes:
+      - claudim_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  claudim_postgres_data:
