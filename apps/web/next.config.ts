@@ -29,6 +29,7 @@ const nextConfig: NextConfig = {
         protocol: cmsUrl.protocol.replace(':', '') as 'http' | 'https',
         hostname: cmsUrl.hostname,
         port: cmsUrl.port || undefined,
+        pathname: '/api/media/**',
       },
     ],
     // Só em dev: PAYLOAD_CMS_URL aponta pro próprio localhost (o app roda o
