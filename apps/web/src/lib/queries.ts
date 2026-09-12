@@ -44,15 +44,22 @@ function extractExcerpt(content: Article['body'] | null | undefined): string {
 
 async function populatePostAuthors(post: RemotePost): Promise<Article['authors']> {
   const authorIds = (post.authors ?? []).map((author) => (typeof author === 'number' ? author : author.id))
-  if (authorIds.length === 0) return (post.populatedAuthors ?? []) as Article['authors']
+  const fallback = (post.populatedAuthors?.length ? post.populatedAuthors : post.authors ?? []) as Article['authors']
+  if (authorIds.length === 0) return fallback
 
-  const { docs } = await cmsFind<Author>('authors', {
-    where: { id: { in: authorIds.join(',') } },
-    limit: authorIds.length,
-    depth: 2,
-  })
+  try {
+    const { docs } = await cmsFind<Author>('authors', {
+      where: { id: { in: authorIds.join(',') } },
+      limit: authorIds.length,
+      depth: 2,
+    })
 
-  return (docs.length > 0 ? docs : post.populatedAuthors ?? post.authors ?? []) as Article['authors']
+    return docs.length > 0 ? docs : fallback
+  } catch {
+    // Avatar é enriquecimento. Se a collection de autores estiver indisponível,
+    // o post continua renderizando com os autores já retornados pelo Payload.
+    return fallback
+  }
 }
 
 async function normalizePost(post: RemotePost): Promise<Article> {
@@ -139,11 +146,9 @@ export async function getActiveAd(slot: AdSlotKey): Promise<Ad | null> {
       depth: 1,
     })
     return docs[0] ?? null
-  } catch (error) {
-    // A VPS pode não ter uma collection de anúncios. Nesse caso, o site
-    // continua funcionando sem publicidade; erros de outros endpoints seguem
-    // sendo propagados para não esconder falhas do CMS.
-    if (error instanceof Error && error.message.includes('"ads" no CMS (404)')) return null
-    throw error
+  } catch {
+    // Publicidade é opcional. A ausência ou indisponibilidade temporária da
+    // collection não pode impedir o restante do site de renderizar.
+    return null
   }
 }
