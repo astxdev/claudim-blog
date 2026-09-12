@@ -11,7 +11,7 @@ export async function SiteHeader() {
 
       <div className="border-border mx-auto flex max-w-6xl items-center justify-between gap-6 border-b px-6 py-4">
         <Link href="/" className="shrink-0">
-          <Image src="/brand/logo-verde.svg" alt="Claudim" width={140} height={29} priority />
+          <Image src="/brand/logo-verde-v2.svg" alt="Claudim" width={140} height={29} priority />
         </Link>
 
         <a

@@ -42,7 +42,20 @@ function extractExcerpt(content: Article['body'] | null | undefined): string {
   return texts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 180)
 }
 
-function normalizePost(post: RemotePost): Article {
+async function populatePostAuthors(post: RemotePost): Promise<Article['authors']> {
+  const authorIds = (post.authors ?? []).map((author) => (typeof author === 'number' ? author : author.id))
+  if (authorIds.length === 0) return (post.populatedAuthors ?? []) as Article['authors']
+
+  const { docs } = await cmsFind<Author>('authors', {
+    where: { id: { in: authorIds.join(',') } },
+    limit: authorIds.length,
+    depth: 2,
+  })
+
+  return (docs.length > 0 ? docs : post.populatedAuthors ?? post.authors ?? []) as Article['authors']
+}
+
+async function normalizePost(post: RemotePost): Promise<Article> {
   return {
     id: post.id,
     title: post.title,
@@ -50,7 +63,7 @@ function normalizePost(post: RemotePost): Article {
     excerpt: extractExcerpt(post.content),
     heroImage: post.heroImage as Article['heroImage'],
     category: (post.categories?.[0] ?? null) as Article['category'],
-    authors: (post.populatedAuthors?.length ? post.populatedAuthors : post.authors ?? []) as Article['authors'],
+    authors: await populatePostAuthors(post),
     body: post.content as Article['body'],
     accessLevel: 'public',
     publishedAt: post.publishedAt,
@@ -103,7 +116,7 @@ export async function getLatestArticles(options: {
     limit,
     depth: 2,
   })
-  return docs.map(normalizePost)
+  return Promise.all(docs.map(normalizePost))
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
