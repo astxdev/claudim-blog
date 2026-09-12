@@ -94,7 +94,9 @@ export async function getLatestArticles(options: {
 
   const { docs } = await cmsFind<RemotePost>('posts', {
     where: {
-      ...(categoryId !== undefined && { categories: { contains: categoryId } }),
+      // `categories` é um relacionamento hasMany no Payload remoto. Para
+      // filtrar por um ID relacionado, a API REST usa `equals`.
+      ...(categoryId !== undefined && { categories: { equals: categoryId } }),
       ...(excludeId !== undefined && { id: { not_equals: excludeId } }),
     },
     sort: '-publishedAt',
@@ -114,13 +116,21 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 }
 
 export async function getActiveAd(slot: AdSlotKey): Promise<Ad | null> {
-  const { docs } = await cmsFind<Ad>('ads', {
-    where: {
-      slot: { equals: slot },
-      active: { equals: true },
-    },
-    limit: 1,
-    depth: 1,
-  })
-  return docs[0] ?? null
+  try {
+    const { docs } = await cmsFind<Ad>('ads', {
+      where: {
+        slot: { equals: slot },
+        active: { equals: true },
+      },
+      limit: 1,
+      depth: 1,
+    })
+    return docs[0] ?? null
+  } catch (error) {
+    // A VPS pode não ter uma collection de anúncios. Nesse caso, o site
+    // continua funcionando sem publicidade; erros de outros endpoints seguem
+    // sendo propagados para não esconder falhas do CMS.
+    if (error instanceof Error && error.message.includes('"ads" no CMS (404)')) return null
+    throw error
+  }
 }
