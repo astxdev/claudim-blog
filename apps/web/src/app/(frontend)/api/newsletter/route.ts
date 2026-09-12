@@ -13,7 +13,7 @@
  */
 import { isInterestArea } from '@claudim/core'
 
-const CMS_URL = process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000'
+const CMS_API_URL = (process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000/api').replace(/\/$/, '')
 
 type FieldErrors = Record<string, string>
 
@@ -46,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
 
   let response: Response
   try {
-    response = await fetch(`${CMS_URL}/api/newsletter-subscribers`, {
+    response = await fetch(`${CMS_API_URL}/newsletter-subscribers`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submission),

@@ -27,7 +27,7 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 }
 
 export async function getFeaturedArticle(): Promise<Article | null> {
-  const { docs } = await cmsFind<Article>('articles', {
+  const { docs } = await cmsFind<Article>('posts', {
     where: { featured: { equals: true } },
     sort: '-publishedAt',
     limit: 1,
@@ -43,7 +43,7 @@ export async function getLatestArticles(options: {
 } = {}): Promise<Article[]> {
   const { categoryId, excludeId, limit = 12 } = options
 
-  const { docs } = await cmsFind<Article>('articles', {
+  const { docs } = await cmsFind<Article>('posts', {
     where: {
       ...(categoryId !== undefined && { category: { equals: categoryId } }),
       ...(excludeId !== undefined && { id: { not_equals: excludeId } }),
@@ -56,7 +56,7 @@ export async function getLatestArticles(options: {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const { docs } = await cmsFind<Article>('articles', {
+  const { docs } = await cmsFind<Article>('posts', {
     where: { slug: { equals: slug } },
     limit: 1,
     depth: 2,

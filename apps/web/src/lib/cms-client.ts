@@ -12,7 +12,10 @@
  * const { docs } = await cmsFind<Article>('articles', { where: { featured: { equals: true } } })
  */
 
-const CMS_URL = process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000'
+// PAYLOAD_CMS_URL aponta para a base da API REST (ex: https://cms.claudim.com/api).
+// Mantemos a origem separada porque URLs de mídia do Payload já começam com /api.
+const CMS_API_URL = (process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000/api').replace(/\/$/, '')
+const CMS_ORIGIN = new URL(CMS_API_URL).origin
 
 type WhereClause = Record<string, Record<string, boolean | number | string>>
 
@@ -53,7 +56,7 @@ export async function cmsFind<T>(
   params: { depth?: number; limit?: number; sort?: string; where?: WhereClause } = {},
 ): Promise<FindResult<T>> {
   const qs = buildSearchParams(params)
-  const res = await fetch(`${CMS_URL}/api/${collection}${qs ? `?${qs}` : ''}`, {
+  const res = await fetch(`${CMS_API_URL}/${collection}${qs ? `?${qs}` : ''}`, {
     next: { revalidate: 60 },
   })
 
@@ -75,5 +78,5 @@ export async function cmsFind<T>(
 export function resolveMediaUrl(url: null | string | undefined): string | undefined {
   if (!url) return undefined
   if (url.startsWith('http://') || url.startsWith('https://')) return url
-  return `${CMS_URL}${url}`
+  return `${CMS_ORIGIN}${url}`
 }
