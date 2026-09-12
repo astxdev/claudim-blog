@@ -22,10 +22,20 @@ type RemotePost = {
   categories?: (number | Category)[] | null
   meta?: { title?: string | null; description?: string | null } | null
   publishedAt: string
-  authors?: (number | Author)[] | null
-  populatedAuthors?: Author[] | null
+  authors?: (number | RemoteUser)[] | null
+  populatedAuthors?: RemoteUser[] | null
   updatedAt: string
   createdAt: string
+}
+
+type RemoteUser = {
+  id: number
+  name?: string | null
+  email?: string | null
+  role?: string | null
+  avatar?: number | Media | null
+  updatedAt?: string
+  createdAt?: string
 }
 
 function extractExcerpt(content: Article['body'] | null | undefined): string {
@@ -48,13 +58,22 @@ async function populatePostAuthors(post: RemotePost): Promise<Article['authors']
   if (authorIds.length === 0) return fallback
 
   try {
-    const { docs } = await cmsFind<Author>('authors', {
+    const { docs } = await cmsFind<RemoteUser>('users', {
       where: { id: { in: authorIds.join(',') } },
       limit: authorIds.length,
       depth: 2,
     })
 
-    return docs.length > 0 ? docs : fallback
+    if (docs.length === 0) return fallback
+
+    return docs.map((user) => ({
+      id: user.id,
+      name: user.name ?? user.email ?? 'Autor',
+      role: user.role ?? null,
+      avatar: user.avatar ?? null,
+      updatedAt: user.updatedAt ?? new Date(0).toISOString(),
+      createdAt: user.createdAt ?? new Date(0).toISOString(),
+    }))
   } catch {
     // Avatar é enriquecimento. Se a collection de autores estiver indisponível,
     // o post continua renderizando com os autores já retornados pelo Payload.
