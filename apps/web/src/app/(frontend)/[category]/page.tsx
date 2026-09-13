@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { ArticleCard } from '../_components/ArticleCard'
 import { AdSlot } from '../_components/AdSlot'
 import { getActiveAd, getCategoryBySlug, getLatestArticles } from '@/lib/queries'
+import { absoluteUrl } from '@/lib/site'
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>
@@ -11,7 +12,11 @@ interface CategoryPageProps {
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { category: slug } = await params
   const category = await getCategoryBySlug(slug)
-  return { title: category?.title ?? 'Seção não encontrada' }
+  return {
+    title: category?.title ?? 'Seção não encontrada',
+    description: category?.description ?? undefined,
+    alternates: { canonical: absoluteUrl(`/${slug}`) },
+  }
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {

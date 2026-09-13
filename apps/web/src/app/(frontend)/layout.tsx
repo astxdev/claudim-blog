@@ -7,6 +7,7 @@ import { SiteFooter } from './_components/SiteFooter'
 import { NewsletterBar } from './_components/NewsletterBar'
 import { TopBanner } from './_components/TopBanner'
 import { getActiveAd } from '@/lib/queries'
+import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -25,12 +26,23 @@ const sourceSerif = Source_Serif_4({
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(`${SITE_URL}/`),
   title: {
     default: 'Claudim — Inteligência aplicada aos negócios',
     template: '%s · Claudim',
   },
-  description:
-    'Notícias e análises sobre tecnologia, negócios, pessoas e processos para quem decide.',
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: './' },
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    siteName: SITE_NAME,
+    title: 'Claudim — Inteligência aplicada aos negócios',
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: { card: 'summary_large_image', title: 'Claudim', description: SITE_DESCRIPTION },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {

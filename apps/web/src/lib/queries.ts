@@ -28,6 +28,13 @@ type RemotePost = {
   createdAt: string
 }
 
+export type PublishedArticleRoute = {
+  title: string
+  slug: string
+  categorySlug: string
+  updatedAt: string
+}
+
 type RemoteUser = {
   id: number
   name?: string | null
@@ -103,8 +110,25 @@ async function normalizePost(post: RemotePost): Promise<Article> {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const { docs } = await cmsFind<Category>('categories', { limit: 4, sort: 'title' })
+  const { docs } = await cmsFind<Category>('categories', { limit: 100, sort: 'title' })
   return docs
+}
+
+export async function getPublishedArticleRoutes(limit = 1000): Promise<PublishedArticleRoute[]> {
+  const { docs } = await cmsFind<RemotePost>('posts', {
+    where: { publishedAt: { exists: true } },
+    limit,
+    sort: '-publishedAt',
+    depth: 1,
+  })
+
+  return docs.flatMap((post) => {
+    const slug = post.slug
+    const category = post.categories?.[0]
+    const categorySlug = typeof category === 'object' && category !== null ? category.slug : undefined
+    if (!slug || !categorySlug) return []
+    return [{ title: post.title, slug, categorySlug, updatedAt: post.updatedAt }]
+  })
 }
 
 export async function getCategoryBySlug(slug: string): Promise<Category | null> {

@@ -1,6 +1,11 @@
 import { ArticleCard } from './_components/ArticleCard'
 import { AdSlot } from './_components/AdSlot'
 import { getActiveAd, getFeaturedArticle, getLatestArticles } from '@/lib/queries'
+import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site'
+
+export const metadata = {
+  alternates: { canonical: absoluteUrl('/') },
+}
 
 
 export default async function HomePage() {
@@ -16,7 +21,20 @@ export default async function HomePage() {
   const moreRiver = latest.slice(5, 9)
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              { '@type': 'Organization', '@id': `${absoluteUrl('/')}#organization`, name: SITE_NAME, url: absoluteUrl('/') },
+              { '@type': 'WebSite', '@id': `${absoluteUrl('/')}#website`, name: SITE_NAME, description: SITE_DESCRIPTION, url: absoluteUrl('/') },
+            ],
+          }),
+        }}
+      />
+      <div className="mx-auto max-w-6xl px-6 py-8">
       {/* Capa: manchete principal + coluna secundária + boletim, tamanhos diferentes lado a lado */}
       <div className="divide-border grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:divide-x">
         <div className="lg:col-span-5">{featured && <ArticleCard article={featured} variant="feature" />}</div>
@@ -54,6 +72,7 @@ export default async function HomePage() {
           </aside>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

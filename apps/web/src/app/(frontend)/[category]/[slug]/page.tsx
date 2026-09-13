@@ -12,6 +12,7 @@ import { isPopulated } from '@/lib/relations'
 import { resolveMediaUrl } from '@/lib/cms-client'
 import { formatPublishedDate } from '@/lib/format'
 import { estimateReadingTimeMinutes } from '@/lib/reading-time'
+import { absoluteUrl, SITE_NAME } from '@/lib/site'
 
 interface ArticlePageProps {
   params: Promise<{ category: string; slug: string }>
@@ -21,9 +22,24 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const { slug } = await params
   const article = await getArticleBySlug(slug)
   if (!article) return { title: 'Matéria não encontrada' }
+  const category = isPopulated(article.category) ? article.category : null
+  const heroImage = isPopulated(article.heroImage) ? article.heroImage : null
+  const canonical = absoluteUrl(`/${category?.slug ?? 'materia'}/${article.slug}`)
   return {
     title: article.seo?.title || article.title,
     description: article.seo?.description || article.excerpt,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      title: article.seo?.title || article.title,
+      description: article.seo?.description || article.excerpt,
+      url: canonical,
+      publishedTime: article.publishedAt,
+      modifiedTime: article.updatedAt,
+      authors: article.authors.filter(isPopulated).map((author) => author.name),
+      images: heroImage?.url ? [{ url: resolveMediaUrl(heroImage.url) ?? heroImage.url, alt: heroImage.alt }] : undefined,
+    },
+    twitter: { card: 'summary_large_image', title: article.title, description: article.seo?.description || article.excerpt },
   }
 }
 
@@ -46,7 +62,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudim.com.br'}/${category?.slug ?? ''}/${article.slug}`
 
   return (
-    <article className="mx-auto max-w-6xl px-6 py-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'NewsArticle',
+            headline: article.title,
+            description: article.seo?.description || article.excerpt,
+            datePublished: article.publishedAt,
+            dateModified: article.updatedAt,
+            mainEntityOfPage: { '@type': 'WebPage', '@id': shareUrl },
+            author: authors.map((author) => ({ '@type': 'Person', name: author.name })),
+            publisher: { '@type': 'Organization', name: SITE_NAME, url: absoluteUrl('/') },
+            image: heroImage?.url,
+          }),
+        }}
+      />
+      <article className="mx-auto max-w-6xl px-6 py-8">
       <header className="mx-auto max-w-3xl text-center">
         {category && (
           <div className="flex justify-center">
@@ -103,6 +137,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div className="mx-auto mt-10 max-w-3xl lg:hidden">
         <AdSlot ad={inlineAd} />
       </div>
-    </article>
+      </article>
+    </>
   )
 }
