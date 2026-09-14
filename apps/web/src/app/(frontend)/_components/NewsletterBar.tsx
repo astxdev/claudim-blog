@@ -12,7 +12,7 @@ export function NewsletterBar() {
   const [sheetOpen, setSheetOpen] = useState(false)
 
   return (
-    <div id="assinar-newsletter" className="bg-ink fixed inset-x-0 bottom-0 z-40">
+    <div id="assinar-newsletter" className="bg-ink fixed inset-x-0 bottom-0 z-40 shadow-[0_-8px_30px_rgb(0_0_0_/_0.12)]">
       <div className="mx-auto hidden max-w-6xl items-center justify-between gap-4 px-6 py-3 md:flex">
         <div>
           <p className="text-sm font-semibold text-ink-inverse">Newsletter Claudim</p>
@@ -26,7 +26,7 @@ export function NewsletterBar() {
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="bg-accent-strong shrink-0 rounded-full px-4 py-2 text-sm font-semibold text-white"
+          className="bg-accent-strong hover:bg-accent shrink-0 rounded-full px-5 py-2.5 text-sm font-bold text-white shadow-lg ring-2 ring-white/20 transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
         >
           Assinar
         </button>
