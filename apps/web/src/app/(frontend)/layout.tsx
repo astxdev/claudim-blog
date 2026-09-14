@@ -6,6 +6,7 @@ import { SiteHeader } from './_components/SiteHeader'
 import { SiteFooter } from './_components/SiteFooter'
 import { NewsletterBar } from './_components/NewsletterBar'
 import { TopBanner } from './_components/TopBanner'
+import { GoogleAnalytics } from './_components/GoogleAnalytics'
 import { getActiveAd } from '@/lib/queries'
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site'
 
@@ -52,6 +53,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${sourceSerif.variable}`}>
       <body className="pb-20">
+        <GoogleAnalytics />
         <TopBanner ad={topBannerAd} />
         <SiteHeader />
         <main>{children}</main>
