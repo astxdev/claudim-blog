@@ -4,7 +4,6 @@ import {
   INTEREST_AREAS,
   createSubscriberRegisteredEvent,
   describeSubscriberValidationError,
-  isInterestArea,
   validateSubscriberInput,
 } from '@claudim/core'
 import { handleSubscriberRegistered } from '@claudim/infra'
@@ -13,7 +12,7 @@ export const NewsletterSubscribers: CollectionConfig = {
   slug: 'newsletter-subscribers',
   admin: {
     useAsTitle: 'email',
-    defaultColumns: ['name', 'email', 'interests', 'subscribedAt'],
+    defaultColumns: ['email', 'subscribedAt'],
   },
   access: {
     create: () => true,
@@ -25,7 +24,7 @@ export const NewsletterSubscribers: CollectionConfig = {
     {
       name: 'name',
       type: 'text',
-      required: true,
+      required: false,
     },
     {
       name: 'email',
@@ -37,7 +36,7 @@ export const NewsletterSubscribers: CollectionConfig = {
       name: 'interests',
       type: 'select',
       hasMany: true,
-      required: true,
+      required: false,
       options: INTEREST_AREAS.map((area) => ({ label: area, value: area })),
     },
     {
@@ -60,9 +59,7 @@ export const NewsletterSubscribers: CollectionConfig = {
         }
 
         const result = validateSubscriberInput({
-          name: data.name,
           email: data.email,
-          interests: data.interests,
         })
 
         if (!result.ok) {
@@ -75,9 +72,7 @@ export const NewsletterSubscribers: CollectionConfig = {
           })
         }
 
-        data.name = result.value.name
         data.email = result.value.email
-        data.interests = result.value.interests
 
         return data
       },
@@ -88,9 +83,7 @@ export const NewsletterSubscribers: CollectionConfig = {
 
         await handleSubscriberRegistered(
           createSubscriberRegisteredEvent({
-            name: doc.name,
             email: doc.email,
-            interests: (Array.isArray(doc.interests) ? doc.interests : []).filter(isInterestArea),
           }),
         )
       },

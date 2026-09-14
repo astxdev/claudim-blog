@@ -10,15 +10,11 @@
  * @example
  * const evento = createSubscriberRegisteredEvent({ name: "Ana", email: "ana@empresa.com", interests: ["tech"] })
  */
-import type { InterestArea } from "../newsletter/interest-area"
-
 export interface SubscriberRegisteredEvent {
   readonly type: "subscriber.registered"
   readonly occurredAt: Date
   readonly payload: {
-    readonly name: string
     readonly email: string
-    readonly interests: readonly InterestArea[]
   }
 }
 
@@ -27,9 +23,7 @@ export interface SubscriberRegisteredEvent {
  * @returns evento de domínio pronto para ser publicado por um handler de infra
  */
 export function createSubscriberRegisteredEvent(subscriber: {
-  name: string
   email: string
-  interests: readonly InterestArea[]
 }): SubscriberRegisteredEvent {
   return {
     type: "subscriber.registered",

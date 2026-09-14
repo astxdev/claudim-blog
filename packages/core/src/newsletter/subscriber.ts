@@ -3,36 +3,29 @@
  * @description Entidade de domínio Subscriber e validação completa do formulário de newsletter
  *
  * Responsabilidade: consolidar as regras de negócio de uma inscrição válida
- * (nome preenchido, e-mail corporativo, ao menos uma área de interesse)
+ * (e-mail corporativo)
  * Camada: core
  *
  * @example
- * const resultado = validateSubscriberInput({ name: "Ana", email: "ana@empresa.com", interests: ["tech"] })
+ * const resultado = validateSubscriberInput({ email: "ana@empresa.com" })
  */
 import { validateCorporateEmail, type CorporateEmailError } from "./corporate-email"
-import { isInterestArea, type InterestArea } from "./interest-area"
 
 export interface Subscriber {
-  readonly name: string
   readonly email: string
-  readonly interests: readonly InterestArea[]
   readonly subscribedAt: Date
   readonly source: string
 }
 
 export interface SubscriberInput {
-  readonly name: unknown
   readonly email: unknown
-  readonly interests: unknown
 }
 
 export type SubscriberValidationError =
-  | { readonly field: "name"; readonly reason: "required" }
-  | { readonly field: "email"; readonly reason: CorporateEmailError["reason"]; readonly domain?: string }
-  | { readonly field: "interests"; readonly reason: "required" }
+  { readonly field: "email"; readonly reason: CorporateEmailError["reason"]; readonly domain?: string }
 
 export type SubscriberValidationResult =
-  | { readonly ok: true; readonly value: { name: string; email: string; interests: InterestArea[] } }
+  | { readonly ok: true; readonly value: { email: string } }
   | { readonly ok: false; readonly errors: readonly SubscriberValidationError[] }
 
 /**
@@ -44,11 +37,6 @@ export type SubscriberValidationResult =
 export function validateSubscriberInput(input: SubscriberInput): SubscriberValidationResult {
   const errors: SubscriberValidationError[] = []
 
-  const name = typeof input.name === "string" ? input.name.trim() : ""
-  if (name.length === 0) {
-    errors.push({ field: "name", reason: "required" })
-  }
-
   const emailResult = validateCorporateEmail(typeof input.email === "string" ? input.email : "")
   if (!emailResult.ok) {
     errors.push({
@@ -58,18 +46,13 @@ export function validateSubscriberInput(input: SubscriberInput): SubscriberValid
     })
   }
 
-  const interests = Array.isArray(input.interests) ? input.interests.filter(isInterestArea) : []
-  if (interests.length === 0) {
-    errors.push({ field: "interests", reason: "required" })
-  }
-
   if (errors.length > 0) {
     return { ok: false, errors }
   }
 
   return {
     ok: true,
-    value: { name, email: emailResult.ok ? emailResult.email : "", interests },
+    value: { email: emailResult.ok ? emailResult.email : "" },
   }
 }
 
@@ -85,14 +68,10 @@ export function validateSubscriberInput(input: SubscriberInput): SubscriberValid
  */
 export function describeSubscriberValidationError(error: SubscriberValidationError): string {
   switch (error.field) {
-    case "name":
-      return "Informe seu nome."
     case "email":
       if (error.reason === "free-email-provider") {
         return `Use seu e-mail corporativo — ${error.domain} não é aceito.`
       }
       return "Informe um e-mail válido."
-    case "interests":
-      return "Selecione ao menos uma área de interesse."
   }
 }

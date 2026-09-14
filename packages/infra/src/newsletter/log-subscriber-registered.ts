@@ -23,7 +23,6 @@ export async function handleSubscriberRegistered(event: SubscriberRegisteredEven
       event: event.type,
       occurredAt: event.occurredAt.toISOString(),
       email: event.payload.email,
-      interests: event.payload.interests,
     }),
   )
 }

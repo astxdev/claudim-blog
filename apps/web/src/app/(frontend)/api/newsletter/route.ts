@@ -11,8 +11,6 @@
  * cima de onde o CMS realmente estiver hospedado.
  * Camada: web (App Router route handler)
  */
-import { isInterestArea } from '@claudim/core'
-
 const CMS_API_URL = (process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000/api').replace(/\/$/, '')
 
 type FieldErrors = Record<string, string>
@@ -25,7 +23,7 @@ interface PayloadRestErrorBody {
 }
 
 /**
- * @param request - corpo esperado: `{ name, email, interests }`
+ * @param request - corpo esperado: `{ email }`
  * @returns 201 em caso de sucesso, 400 com erros por campo, 500 em falha inesperada
  */
 export async function POST(request: Request): Promise<Response> {
@@ -35,11 +33,9 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ errors: { form: 'Payload inválido.' } satisfies FieldErrors }, { status: 400 })
   }
 
-  const { name, email, interests } = body as Record<string, unknown>
+  const { email } = body as Record<string, unknown>
   const submission = {
-    name: typeof name === 'string' ? name : '',
     email: typeof email === 'string' ? email : '',
-    interests: (Array.isArray(interests) ? interests : []).filter(isInterestArea),
     source: 'website',
     subscribedAt: new Date().toISOString(),
   }
