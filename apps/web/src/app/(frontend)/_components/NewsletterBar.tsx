@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NewsletterForm } from './NewsletterForm'
 
 /**
@@ -10,9 +10,23 @@ import { NewsletterForm } from './NewsletterForm'
  */
 export function NewsletterBar() {
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 120) setIsVisible(true)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
-    <div id="assinar-newsletter" className="bg-ink fixed inset-x-0 bottom-0 z-40 shadow-[0_-8px_30px_rgb(0_0_0_/_0.12)]">
+    <div
+      id="assinar-newsletter"
+      aria-hidden={!isVisible}
+      className={`newsletter-bar bg-ink fixed inset-x-0 bottom-0 z-40 shadow-[0_-8px_30px_rgb(0_0_0_/_0.12)] ${isVisible ? 'newsletter-bar--visible' : ''}`}
+    >
       <div className="mx-auto hidden max-w-6xl items-center justify-between gap-4 px-6 py-3 md:flex">
         <div>
           <p className="text-sm font-semibold text-ink-inverse">Newsletter Claudim</p>

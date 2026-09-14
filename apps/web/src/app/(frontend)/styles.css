@@ -79,12 +79,32 @@
     line-height: 1.15;
   }
 
+  .newsletter-bar {
+    transform: translateY(100%);
+    transition: transform 450ms ease;
+  }
+
+  .newsletter-bar--visible {
+    transform: translateY(0);
+  }
+
   .sendpulse-newsletter {
     width: 100%;
   }
 
   .sendpulse-newsletter .sp-form-fields-wrapper {
     width: 100%;
+  }
+
+  .sendpulse-newsletter .sp-form[sp-id='255263'] {
+    display: block;
+    width: 480px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+    border-radius: 0;
+    background: #004039;
+    font-family: Arial, 'Helvetica Neue', sans-serif;
   }
 
   .sendpulse-newsletter .sp-element-container {
@@ -103,8 +123,8 @@
     width: 100%;
     height: 2.5rem;
     border: 1px solid #cccccc;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    background: rgb(0 0 0);
     color: var(--color-ink-inverse);
     padding: 0 0.75rem;
     font-size: 0.875rem;
@@ -117,8 +137,8 @@
   .sendpulse-newsletter .sp-button {
     height: 2.5rem;
     border: 0;
-    border-radius: 9999px;
-    background: var(--color-accent-strong);
+    border-radius: 4px;
+    background: #eb9003;
     color: white;
     padding: 0 1.25rem;
     font-size: 0.875rem;
@@ -142,12 +162,7 @@
 
   .sendpulse-newsletter:not(.sendpulse-newsletter--compact) .sp-form-control {
     height: 2.75rem;
-    background: white;
-    color: var(--color-ink);
-  }
-
-  .sendpulse-newsletter:not(.sendpulse-newsletter--compact) .sp-button {
-    width: 100%;
-    height: 2.75rem;
+    background: rgb(0 0 0);
+    color: white;
   }
 }
