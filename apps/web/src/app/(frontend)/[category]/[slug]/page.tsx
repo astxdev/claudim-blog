@@ -6,6 +6,7 @@ import { AuthorByline } from '../../_components/AuthorByline'
 import { CategoryBadge } from '../../_components/CategoryBadge'
 import { ShareBar } from '../../_components/ShareBar'
 import { AdSlot } from '../../_components/AdSlot'
+import { ArticleCard } from '../../_components/ArticleCard'
 import { MembersGate } from '../../_components/MembersGate'
 import { getActiveAd, getArticleBySlug } from '@/lib/queries'
 import { isPopulated } from '@/lib/relations'
@@ -58,8 +59,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const authors = article.authors.filter(isPopulated)
   const readingTime = estimateReadingTimeMinutes(article.body)
   const inlineAd = await getActiveAd('article-inline')
+  const relatedPosts = article.relatedPosts ?? []
 
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claudim.com.br'}/${category?.slug ?? ''}/${article.slug}`
+  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://blog.claudim.com'}/${category?.slug ?? ''}/${article.slug}`
 
   return (
     <>
@@ -137,6 +139,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <div className="mx-auto mt-10 max-w-3xl lg:hidden">
         <AdSlot ad={inlineAd} />
       </div>
+
+      {relatedPosts.length > 0 && (
+        <section className="mx-auto mt-14 max-w-4xl border-t border-border pt-8">
+          <h2 className="headline text-2xl font-semibold text-ink">Related posts</h2>
+          <div className="mt-6 grid gap-8 md:grid-cols-3">
+            {relatedPosts.map((relatedPost) => (
+              <ArticleCard key={relatedPost.id} article={relatedPost} variant="secondary" />
+            ))}
+          </div>
+        </section>
+      )}
       </article>
     </>
   )

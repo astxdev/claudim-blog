@@ -24,8 +24,13 @@ type RemotePost = {
   publishedAt: string
   authors?: (number | RemoteUser)[] | null
   populatedAuthors?: RemoteUser[] | null
+  relatedPosts?: (number | RemotePost)[] | null
   updatedAt: string
   createdAt: string
+}
+
+export type ArticleWithRelated = Article & {
+  relatedPosts?: Article[]
 }
 
 export type PublishedArticleRoute = {
@@ -88,8 +93,8 @@ async function populatePostAuthors(post: RemotePost): Promise<Article['authors']
   }
 }
 
-async function normalizePost(post: RemotePost): Promise<Article> {
-  return {
+async function normalizePost(post: RemotePost, options: { includeRelated?: boolean } = {}): Promise<ArticleWithRelated> {
+  const article: ArticleWithRelated = {
     id: post.id,
     title: post.title,
     slug: post.slug,
@@ -107,6 +112,21 @@ async function normalizePost(post: RemotePost): Promise<Article> {
     updatedAt: post.updatedAt,
     createdAt: post.createdAt,
   }
+
+  if (options.includeRelated && post.relatedPosts?.length) {
+    const populatedRelatedPosts = post.relatedPosts.filter(
+      (relatedPost): relatedPost is RemotePost => typeof relatedPost === 'object' && relatedPost !== null,
+    )
+
+    article.relatedPosts = await Promise.all(
+      populatedRelatedPosts
+        .filter((relatedPost) => relatedPost.slug && relatedPost.id !== post.id)
+        .slice(0, 3)
+        .map((relatedPost) => normalizePost(relatedPost)),
+    )
+  }
+
+  return article
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -166,16 +186,16 @@ export async function getLatestArticles(options: {
     limit,
     depth: 2,
   })
-  return Promise.all(docs.map(normalizePost))
+  return Promise.all(docs.map((post) => normalizePost(post)))
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
+export async function getArticleBySlug(slug: string): Promise<ArticleWithRelated | null> {
   const { docs } = await cmsFind<RemotePost>('posts', {
     where: { slug: { equals: slug } },
     limit: 1,
-    depth: 2,
+    depth: 3,
   })
-  return docs[0] ? normalizePost(docs[0]) : null
+  return docs[0] ? normalizePost(docs[0], { includeRelated: true }) : null
 }
 
 export async function getActiveAd(slot: AdSlotKey): Promise<Ad | null> {
