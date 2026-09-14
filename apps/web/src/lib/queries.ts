@@ -21,12 +21,12 @@ type RemotePost = {
   content?: Article['body'] | null
   categories?: (number | Category)[] | null
   meta?: { title?: string | null; description?: string | null } | null
-  publishedAt: string
+  publishedAt?: string | null
   authors?: (number | RemoteUser)[] | null
   populatedAuthors?: RemoteUser[] | null
   relatedPosts?: (number | RemotePost)[] | null
-  updatedAt: string
-  createdAt: string
+  updatedAt?: string | null
+  createdAt?: string | null
 }
 
 export type ArticleWithRelated = Article & {
@@ -48,6 +48,14 @@ type RemoteUser = {
   avatar?: number | Media | null
   updatedAt?: string
   createdAt?: string
+}
+
+function isValidDate(value: null | string | undefined): value is string {
+  return Boolean(value && !Number.isNaN(new Date(value).getTime()))
+}
+
+function fallbackDate(...values: (null | string | undefined)[]): string {
+  return values.find(isValidDate) ?? new Date(0).toISOString()
 }
 
 function extractExcerpt(content: Article['body'] | null | undefined): string {
@@ -104,13 +112,13 @@ async function normalizePost(post: RemotePost, options: { includeRelated?: boole
     authors: await populatePostAuthors(post),
     body: post.content as Article['body'],
     accessLevel: 'public',
-    publishedAt: post.publishedAt,
+    publishedAt: fallbackDate(post.publishedAt, post.createdAt),
     seo: {
       title: post.meta?.title,
       description: post.meta?.description,
     },
-    updatedAt: post.updatedAt,
-    createdAt: post.createdAt,
+    updatedAt: fallbackDate(post.updatedAt, post.createdAt, post.publishedAt),
+    createdAt: fallbackDate(post.createdAt, post.publishedAt, post.updatedAt),
   }
 
   if (options.includeRelated && post.relatedPosts?.length) {
@@ -120,7 +128,7 @@ async function normalizePost(post: RemotePost, options: { includeRelated?: boole
 
     article.relatedPosts = await Promise.all(
       populatedRelatedPosts
-        .filter((relatedPost) => relatedPost.slug && relatedPost.id !== post.id)
+        .filter((relatedPost) => relatedPost.slug && relatedPost.id !== post.id && isValidDate(relatedPost.publishedAt))
         .slice(0, 3)
         .map((relatedPost) => normalizePost(relatedPost)),
     )
@@ -147,7 +155,7 @@ export async function getPublishedArticleRoutes(limit = 1000): Promise<Published
     const category = post.categories?.[0]
     const categorySlug = typeof category === 'object' && category !== null ? category.slug : undefined
     if (!slug || !categorySlug) return []
-    return [{ title: post.title, slug, categorySlug, updatedAt: post.updatedAt }]
+    return [{ title: post.title, slug, categorySlug, updatedAt: fallbackDate(post.updatedAt, post.publishedAt, post.createdAt) }]
   })
 }
 

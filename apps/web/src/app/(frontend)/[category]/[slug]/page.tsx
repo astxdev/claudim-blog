@@ -58,6 +58,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const heroImage = heroImageSource && heroImageUrl ? { ...heroImageSource, url: heroImageUrl } : null
   const authors = article.authors.filter(isPopulated)
   const readingTime = estimateReadingTimeMinutes(article.body)
+  const publishedDate = formatPublishedDate(article.publishedAt)
   const inlineAd = await getActiveAd('article-inline')
   const relatedPosts = article.relatedPosts ?? []
 
@@ -95,7 +96,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <AuthorByline authors={authors} />
         </div>
         <p className="text-ink-muted mt-2 text-sm">
-          {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
+          {publishedDate ? `${publishedDate} · ` : ''}
+          {readingTime} min de leitura
         </p>
       </header>
 

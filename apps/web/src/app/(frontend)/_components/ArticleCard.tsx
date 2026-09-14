@@ -18,6 +18,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   const heroImageUrl = resolveMediaUrl(heroImageSource?.url)
   const heroImage = heroImageSource && heroImageUrl ? { ...heroImageSource, url: heroImageUrl } : null
   const readingTime = estimateReadingTimeMinutes(article.body)
+  const publishedDate = formatPublishedDate(article.publishedAt)
   const href = category ? `/${category.slug}/${article.slug}` : '#'
   const badge = category && (
     <CategoryBadge title={category.title} slug={category.slug} accentColor={category.accentColor} asLink={false} />
@@ -29,7 +30,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
         <Link href={href} className="group block">
           {badge}
           <h3 className="headline mt-1 text-base font-semibold leading-snug group-hover:underline">{article.title}</h3>
-          <p className="text-ink-muted mt-1 text-xs">{formatPublishedDate(article.publishedAt)}</p>
+          {publishedDate && <p className="text-ink-muted mt-1 text-xs">{publishedDate}</p>}
         </Link>
       </li>
     )
@@ -58,7 +59,8 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
             </h2>
             {article.dek && <p className="text-ink-muted mt-3 text-base sm:text-lg">{article.dek}</p>}
             <p className="text-ink-muted mt-3 text-xs">
-              {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
+              {publishedDate ? `${publishedDate} · ` : ''}
+              {readingTime} min de leitura
             </p>
           </div>
         </Link>
@@ -78,7 +80,8 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               {article.title}
             </h3>
             <p className="text-ink-muted mt-1.5 text-xs">
-              {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
+              {publishedDate ? `${publishedDate} · ` : ''}
+              {readingTime} min de leitura
             </p>
           </div>
           {heroImage && (
@@ -116,7 +119,8 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
           </h3>
           <p className="text-ink-muted mt-2 line-clamp-2 text-sm sm:text-base">{article.excerpt}</p>
           <p className="text-ink-muted mt-3 text-xs">
-            {formatPublishedDate(article.publishedAt)} · {readingTime} min de leitura
+            {publishedDate ? `${publishedDate} · ` : ''}
+            {readingTime} min de leitura
           </p>
         </div>
       </Link>
