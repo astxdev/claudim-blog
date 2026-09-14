@@ -59,6 +59,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <main>{children}</main>
         <SiteFooter />
         <NewsletterBar />
+        <script type="text/javascript" async src="//web.webformscr.com/apps/fc3/build/default-handler.js" />
       </body>
     </html>
   )
