@@ -213,6 +213,24 @@ export async function getLatestArticles(options: {
   return Promise.all(docs.map((post) => normalizePost(post)))
 }
 
+export async function searchArticles(query: string, limit = 30): Promise<Article[]> {
+  const normalizedQuery = query.trim()
+  if (!normalizedQuery) return []
+
+  const { docs } = await cmsFind<RemotePost>('posts', {
+    where: {
+      or: [
+        { title: { like: normalizedQuery } },
+        { 'meta.title': { like: normalizedQuery } },
+      ],
+    },
+    sort: '-publishedAt',
+    limit,
+    depth: 2,
+  })
+  return Promise.all(docs.map((post) => normalizePost(post)))
+}
+
 export async function getArticleBySlug(slug: string): Promise<ArticleWithRelated | null> {
   const { docs } = await cmsFind<RemotePost>('posts', {
     where: { slug: { equals: slug } },

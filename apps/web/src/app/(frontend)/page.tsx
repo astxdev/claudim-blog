@@ -26,9 +26,9 @@ export default async function HomePage() {
     })),
   )
 
-  const secondary = latest.slice(0, 2)
-  const brief = latest.slice(2, 5)
-  const moreRiver = latest.slice(5, 9)
+  const secondary = latest.slice(0, 3)
+  const brief = latest.slice(3, 6)
+  const moreRiver = latest.slice(6, 10)
 
   return (
     <>

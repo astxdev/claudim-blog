@@ -17,7 +17,10 @@
 const CMS_API_URL = (process.env.PAYLOAD_CMS_URL ?? 'http://localhost:3000/api').replace(/\/$/, '')
 const CMS_ORIGIN = new URL(CMS_API_URL).origin
 
-type WhereClause = Record<string, Record<string, boolean | number | string>>
+type WhereValue = boolean | number | string
+type WhereClause = Record<string, Record<string, WhereValue>> | {
+  or: Array<Record<string, Record<string, WhereValue>>>
+}
 
 export interface FindResult<T> {
   docs: T[]
@@ -36,7 +39,17 @@ function buildSearchParams(params: {
 
   if (params.where) {
     for (const [field, conditions] of Object.entries(params.where)) {
-      for (const [operator, value] of Object.entries(conditions)) {
+      if (field === 'or' && Array.isArray(conditions)) {
+        conditions.forEach((clause, index) => {
+          for (const [orField, orConditions] of Object.entries(clause)) {
+            for (const [operator, value] of Object.entries(orConditions as Record<string, WhereValue>)) {
+              search.set(`where[or][${index}][${orField}][${operator}]`, String(value))
+            }
+          }
+        })
+        continue
+      }
+      for (const [operator, value] of Object.entries(conditions as Record<string, WhereValue>)) {
         search.set(`where[${field}][${operator}]`, String(value))
       }
     }
