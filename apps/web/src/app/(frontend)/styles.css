@@ -117,7 +117,13 @@
   }
 
   .hero-carousel .hero-carousel__image {
-    aspect-ratio: 21 / 8;
+    aspect-ratio: 16 / 7;
+  }
+
+  @media (min-width: 40rem) {
+    .hero-carousel .hero-carousel__image {
+      aspect-ratio: 46 / 10;
+    }
   }
 
   .hero-carousel__arrow {
@@ -168,6 +174,27 @@
   .hero-carousel__dot--active {
     width: 1.5rem;
     background: var(--color-accent-strong);
+  }
+
+  .homepage-editorial-section {
+    margin-inline: -1.5rem;
+    padding: 2.5rem 1.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .homepage-editorial-section--tinted {
+    background: #f5f2e9;
+  }
+
+  .homepage-editorial-section .headline {
+    letter-spacing: -0.02em;
+  }
+
+  @media (min-width: 64rem) {
+    .homepage-editorial-section {
+      margin-inline: -2.5rem;
+      padding-inline: 2.5rem;
+    }
   }
 
   @keyframes hero-carousel-in {

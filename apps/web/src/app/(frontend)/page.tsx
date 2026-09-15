@@ -22,7 +22,7 @@ export default async function HomePage() {
   const categorySections = await Promise.all(
     categories.map(async (category) => ({
       category,
-      articles: await getLatestArticles({ categoryId: category.id, limit: 3 }),
+      articles: await getLatestArticles({ categoryId: category.id, limit: 5 }),
     })),
   )
 
@@ -84,19 +84,43 @@ export default async function HomePage() {
       </div>
 
       <div className="mt-14 border-t border-border pt-10">
-        <h2 className="headline text-xl font-semibold text-ink">Por categoria</h2>
-        <div className="mt-6 grid gap-10 lg:grid-cols-2">
-          {categorySections.filter(({ articles }) => articles.length > 0).map(({ category, articles }) => (
-            <section key={category.id} aria-labelledby={`category-${category.id}`}>
-              <div className="flex items-baseline justify-between border-b border-border pb-2">
-                <h3 id={`category-${category.id}`} className="headline text-2xl font-semibold text-ink">{category.title}</h3>
-                <Link href={`/${category.slug}`} className="text-accent-strong text-sm font-semibold underline">Ver todas</Link>
-              </div>
-              <div className="mt-5 flex flex-col gap-6">
-                {articles.map((article) => <ArticleCard key={article.id} article={article} />)}
-              </div>
-            </section>
-          ))}
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="kicker text-ink-muted">Navegue por assunto</p>
+            <h2 className="headline mt-1 text-2xl font-semibold text-ink sm:text-3xl">Editorias Claudim</h2>
+          </div>
+          <span className="text-ink-muted hidden text-sm sm:block">Análises para decisões melhores</span>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-10">
+          {categorySections.filter(({ articles }) => articles.length > 0).map(({ category, articles }, sectionIndex) => {
+            const [lead, ...secondaryArticles] = articles
+            const isTinted = sectionIndex % 2 === 0
+
+            return (
+              <section
+                key={category.id}
+                aria-labelledby={`category-${category.id}`}
+                className={`homepage-editorial-section ${isTinted ? 'homepage-editorial-section--tinted' : ''}`}
+              >
+                <div className="flex items-baseline justify-between gap-4 border-b border-border pb-3">
+                  <h3 id={`category-${category.id}`} className="headline text-2xl font-semibold text-ink sm:text-3xl">{category.title}</h3>
+                  <Link href={`/${category.slug}`} className="text-accent-strong shrink-0 text-sm font-semibold underline">Ver todas</Link>
+                </div>
+
+                <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:gap-10">
+                  <div className="lg:col-span-7">
+                    <ArticleCard article={lead} variant="feature" />
+                  </div>
+                  <div className="grid content-start gap-0 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+                    {secondaryArticles.map((article) => (
+                      <ArticleCard key={article.id} article={article} variant="secondary" />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )
+          })}
         </div>
       </div>
       </div>
