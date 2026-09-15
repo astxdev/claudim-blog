@@ -49,7 +49,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               width={heroImage.width ?? 1600}
               height={heroImage.height ?? 900}
               priority
-              className="aspect-[4/3] w-full rounded-md object-cover sm:aspect-[16/10]"
+              className="hero-carousel__image aspect-[4/3] w-full rounded-md object-cover sm:aspect-[16/10]"
             />
           )}
           <div className="mt-4">

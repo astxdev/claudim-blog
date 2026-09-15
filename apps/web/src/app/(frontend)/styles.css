@@ -116,9 +116,13 @@
     animation: hero-carousel-in 500ms ease both;
   }
 
+  .hero-carousel .hero-carousel__image {
+    aspect-ratio: 21 / 8;
+  }
+
   .hero-carousel__arrow {
     position: absolute;
-    top: min(38vw, 19rem);
+    top: clamp(6rem, 18vw, 14rem);
     display: flex;
     height: 2.5rem;
     width: 2.5rem;
