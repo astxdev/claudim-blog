@@ -170,13 +170,19 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
 }
 
 export async function getFeaturedArticles(limit = 3): Promise<Article[]> {
-  const { docs } = await cmsFind<RemotePost>('posts', {
-    where: { featured: { equals: true } },
-    sort: 'featuredOrder',
-    limit,
-    depth: 2,
-  })
-  return Promise.all(docs.map((post) => normalizePost(post)))
+  try {
+    const { docs } = await cmsFind<RemotePost>('posts', {
+      where: { featured: { equals: true } },
+      sort: 'featuredOrder',
+      limit,
+      depth: 2,
+    })
+    return Promise.all(docs.map((post) => normalizePost(post)))
+  } catch {
+    // O CMS remoto pode ainda não ter recebido os campos do carrossel.
+    // Nesse caso, a home usa o fallback de notícias recentes.
+    return []
+  }
 }
 
 export async function getFeaturedArticle(): Promise<Article | null> {
