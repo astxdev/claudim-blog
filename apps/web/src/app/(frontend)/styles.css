@@ -117,7 +117,7 @@
   }
 
   .hero-carousel .hero-carousel__image {
-    aspect-ratio: 16 / 7;
+    aspect-ratio: 3 / 1;
   }
 
   @media (min-width: 40rem) {
