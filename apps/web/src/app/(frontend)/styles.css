@@ -186,6 +186,20 @@
     background: #f5f2e9;
   }
 
+  .category-page__section--tinted {
+    margin-inline: -1.5rem;
+    padding: 2.5rem 1.5rem;
+    border-radius: 0.75rem;
+    background: #f5f2e9;
+  }
+
+  @media (min-width: 64rem) {
+    .category-page__section--tinted {
+      margin-inline: -2.5rem;
+      padding-inline: 2.5rem;
+    }
+  }
+
   .homepage-editorial-section .headline {
     letter-spacing: -0.02em;
   }
