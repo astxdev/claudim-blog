@@ -1,6 +1,8 @@
 import { ArticleCard } from './_components/ArticleCard'
+import { HeroCarousel } from './_components/HeroCarousel'
 import { AdSlot } from './_components/AdSlot'
-import { getActiveAd, getFeaturedArticle, getLatestArticles } from '@/lib/queries'
+import Link from 'next/link'
+import { getActiveAd, getCategories, getFeaturedArticles, getLatestArticles } from '@/lib/queries'
 import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME } from '@/lib/site'
 
 export const metadata = {
@@ -9,12 +11,20 @@ export const metadata = {
 
 
 export default async function HomePage() {
-  const featured = await getFeaturedArticle()
-  const [latest, homeAd, sidebarAd] = await Promise.all([
-    getLatestArticles({ excludeId: featured?.id, limit: 13 }),
+  const [featuredSlides, categories, homeAd, sidebarAd] = await Promise.all([
+    getFeaturedArticles(3),
+    getCategories(),
     getActiveAd('homepage-after-hero'),
     getActiveAd('section-sidebar'),
   ])
+  const latest = await getLatestArticles({ excludeIds: featuredSlides.map((article) => article.id), limit: 13 })
+  const slides = featuredSlides.length > 0 ? featuredSlides : latest.slice(0, 3)
+  const categorySections = await Promise.all(
+    categories.map(async (category) => ({
+      category,
+      articles: await getLatestArticles({ categoryId: category.id, limit: 3 }),
+    })),
+  )
 
   const secondary = latest.slice(0, 2)
   const brief = latest.slice(2, 5)
@@ -35,17 +45,17 @@ export default async function HomePage() {
         }}
       />
       <div className="mx-auto max-w-6xl px-6 py-8">
-      {/* Capa: manchete principal + coluna secundária + boletim, tamanhos diferentes lado a lado */}
-      <div className="divide-border grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:divide-x">
-        <div className="lg:col-span-5">{featured && <ArticleCard article={featured} variant="feature" />}</div>
+      <HeroCarousel articles={slides} />
 
-        <div className="flex flex-col lg:col-span-4 lg:pl-10">
+      {/* Capa: coluna secundária + boletim, abaixo do carrossel principal */}
+      <div className="divide-border grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:divide-x">
+        <div className="flex flex-col lg:col-span-8 lg:pl-0">
           {secondary.map((article) => (
             <ArticleCard key={article.id} article={article} variant="secondary" />
           ))}
         </div>
 
-        <aside className="flex flex-col gap-6 lg:col-span-3 lg:pl-10">
+        <aside className="flex flex-col gap-6 lg:col-span-4 lg:pl-10">
           <div className="border-border rounded-md border p-4">
             <h2 className="kicker text-ink-muted">Resumo do dia</h2>
             <ul className="mt-2">
@@ -70,6 +80,23 @@ export default async function HomePage() {
           <aside>
             <AdSlot ad={sidebarAd} />
           </aside>
+        </div>
+      </div>
+
+      <div className="mt-14 border-t border-border pt-10">
+        <h2 className="headline text-xl font-semibold text-ink">Por categoria</h2>
+        <div className="mt-6 grid gap-10 lg:grid-cols-2">
+          {categorySections.filter(({ articles }) => articles.length > 0).map(({ category, articles }) => (
+            <section key={category.id} aria-labelledby={`category-${category.id}`}>
+              <div className="flex items-baseline justify-between border-b border-border pb-2">
+                <h3 id={`category-${category.id}`} className="headline text-2xl font-semibold text-ink">{category.title}</h3>
+                <Link href={`/${category.slug}`} className="text-accent-strong text-sm font-semibold underline">Ver todas</Link>
+              </div>
+              <div className="mt-5 flex flex-col gap-6">
+                {articles.map((article) => <ArticleCard key={article.id} article={article} />)}
+              </div>
+            </section>
+          ))}
         </div>
       </div>
       </div>

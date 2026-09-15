@@ -99,6 +99,83 @@
     transform: translateY(0);
   }
 
+  .hero-carousel {
+    position: relative;
+  }
+
+  .hero-carousel__slides {
+    position: relative;
+  }
+
+  .hero-carousel__slide {
+    display: none;
+  }
+
+  .hero-carousel__slide--active {
+    display: block;
+    animation: hero-carousel-in 500ms ease both;
+  }
+
+  .hero-carousel__arrow {
+    position: absolute;
+    top: min(38vw, 19rem);
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: rgb(0 64 57 / 85%);
+    color: var(--color-ink-inverse);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background-color 150ms ease;
+  }
+
+  .hero-carousel__arrow:hover {
+    background: var(--color-ink);
+  }
+
+  .hero-carousel__arrow--prev {
+    left: 1rem;
+  }
+
+  .hero-carousel__arrow--next {
+    right: 1rem;
+  }
+
+  .hero-carousel__dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .hero-carousel__dot {
+    height: 0.5rem;
+    width: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-border);
+    cursor: pointer;
+  }
+
+  .hero-carousel__dot--active {
+    width: 1.5rem;
+    background: var(--color-accent-strong);
+  }
+
+  @keyframes hero-carousel-in {
+    from { opacity: 0; transform: translateX(1rem); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-carousel__slide--active { animation: none; }
+    .newsletter-bar { transition: none; }
+  }
+
   .sendpulse-newsletter {
     width: 100%;
   }

@@ -273,6 +273,7 @@ export interface Article {
    * Elegível para a faixa de capa da home.
    */
   featured?: boolean | null;
+  featuredOrder?: number | null;
   publishedAt: string;
   seo?: {
     title?: string | null;

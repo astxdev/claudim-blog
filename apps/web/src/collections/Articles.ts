@@ -92,6 +92,16 @@ export const Articles: CollectionConfig = {
       },
     },
     {
+      name: 'featuredOrder',
+      type: 'number',
+      min: 1,
+      max: 3,
+      admin: {
+        description: 'Ordem no carrossel da capa: 1, 2 ou 3.',
+        condition: (_, siblingData) => Boolean(siblingData?.featured),
+      },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       required: true,

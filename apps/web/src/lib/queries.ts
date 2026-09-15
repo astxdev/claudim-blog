@@ -25,6 +25,8 @@ type RemotePost = {
   authors?: (number | RemoteUser)[] | null
   populatedAuthors?: RemoteUser[] | null
   relatedPosts?: (number | RemotePost)[] | null
+  featured?: boolean | null
+  featuredOrder?: number | null
   updatedAt?: string | null
   createdAt?: string | null
 }
@@ -167,28 +169,36 @@ export async function getCategoryBySlug(slug: string): Promise<Category | null> 
   return docs[0] ?? null
 }
 
-export async function getFeaturedArticle(): Promise<Article | null> {
+export async function getFeaturedArticles(limit = 3): Promise<Article[]> {
   const { docs } = await cmsFind<RemotePost>('posts', {
-    sort: '-publishedAt',
-    limit: 1,
+    where: { featured: { equals: true } },
+    sort: 'featuredOrder',
+    limit,
     depth: 2,
   })
-  return docs[0] ? normalizePost(docs[0]) : null
+  return Promise.all(docs.map((post) => normalizePost(post)))
+}
+
+export async function getFeaturedArticle(): Promise<Article | null> {
+  const articles = await getFeaturedArticles(1)
+  return articles[0] ?? null
 }
 
 export async function getLatestArticles(options: {
   categoryId?: number
   excludeId?: number
+  excludeIds?: number[]
   limit?: number
 } = {}): Promise<Article[]> {
-  const { categoryId, excludeId, limit = 12 } = options
+  const { categoryId, excludeId, excludeIds = [], limit = 12 } = options
+  const excludedIds = [...excludeIds, ...(excludeId !== undefined ? [excludeId] : [])]
 
   const { docs } = await cmsFind<RemotePost>('posts', {
     where: {
       // `categories` é um relacionamento hasMany no Payload remoto. Para
       // filtrar por um ID relacionado, a API REST usa `equals`.
       ...(categoryId !== undefined && { categories: { equals: categoryId } }),
-      ...(excludeId !== undefined && { id: { not_equals: excludeId } }),
+      ...(excludedIds.length > 0 && { id: { not_in: excludedIds.join(',') } }),
     },
     sort: '-publishedAt',
     limit,
