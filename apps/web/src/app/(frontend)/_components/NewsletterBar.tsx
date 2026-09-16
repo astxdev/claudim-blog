@@ -11,8 +11,11 @@ import { NewsletterForm } from './NewsletterForm'
 export function NewsletterBar() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
+    setIsDismissed(window.localStorage.getItem('claudim-newsletter-dismissed') === 'true')
+
     function handleScroll() {
       if (window.scrollY > 120) setIsVisible(true)
     }
@@ -21,12 +24,25 @@ export function NewsletterBar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  function dismissNewsletter() {
+    setIsDismissed(true)
+    window.localStorage.setItem('claudim-newsletter-dismissed', 'true')
+  }
+
   return (
     <div
       id="assinar-newsletter"
       aria-hidden={!isVisible}
-      className={`newsletter-bar bg-ink fixed inset-x-0 bottom-0 z-40 shadow-[0_-8px_30px_rgb(0_0_0_/_0.12)] ${isVisible ? 'newsletter-bar--visible' : ''}`}
+      className={`newsletter-bar bg-ink fixed inset-x-0 bottom-0 z-40 shadow-[0_-8px_30px_rgb(0_0_0_/_0.12)] ${isVisible && !isDismissed ? 'newsletter-bar--visible' : ''}`}
     >
+      <button
+        type="button"
+        onClick={dismissNewsletter}
+        aria-label="Esconder newsletter"
+        className="newsletter-bar__close text-ink-inverse/70 hover:text-ink-inverse"
+      >
+        ×
+      </button>
       <div className="mx-auto hidden max-w-6xl items-center justify-between gap-4 px-6 py-3 md:flex">
         <div>
           <p className="text-sm font-semibold text-ink-inverse">Newsletter Claudim</p>
