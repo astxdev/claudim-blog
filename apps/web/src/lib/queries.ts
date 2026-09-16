@@ -20,7 +20,7 @@ type RemotePost = {
   heroImage?: number | Media | null
   content?: Article['body'] | null
   categories?: (number | Category)[] | null
-  meta?: { title?: string | null; description?: string | null } | null
+  meta?: { title?: string | null; description?: string | null; image?: number | Media | null } | null
   publishedAt?: string | null
   authors?: (number | RemoteUser)[] | null
   populatedAuthors?: RemoteUser[] | null
@@ -109,7 +109,7 @@ async function normalizePost(post: RemotePost, options: { includeRelated?: boole
     title: post.title,
     slug: post.slug,
     excerpt: extractExcerpt(post.content),
-    heroImage: post.heroImage as Article['heroImage'],
+    heroImage: (post.heroImage ?? post.meta?.image ?? null) as Article['heroImage'],
     category: (post.categories?.[0] ?? null) as Article['category'],
     authors: await populatePostAuthors(post),
     body: post.content as Article['body'],
