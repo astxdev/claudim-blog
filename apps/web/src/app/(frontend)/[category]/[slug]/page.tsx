@@ -143,8 +143,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       </div>
 
       {relatedPosts.length > 0 && (
-        <section className="mx-auto mt-14 max-w-4xl border-t border-border pt-8">
-          <h2 className="headline text-2xl font-semibold text-ink">Related posts</h2>
+        <section className="article-related-posts mx-auto mt-14 max-w-4xl border-t border-border pt-8">
+          <p className="kicker text-ink-muted">Continue explorando</p>
+          <h2 className="headline mt-1 text-2xl font-semibold text-ink">Posts relacionados</h2>
           <div className="mt-6 grid gap-8 md:grid-cols-3">
             {relatedPosts.map((relatedPost) => (
               <ArticleCard key={relatedPost.id} article={relatedPost} variant="secondary" />

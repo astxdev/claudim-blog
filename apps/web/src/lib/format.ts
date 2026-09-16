@@ -12,7 +12,7 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 
 export function formatPublishedDate(iso: string): string {
   const date = new Date(iso)
-  if (Number.isNaN(date.getTime())) return ''
+  if (Number.isNaN(date.getTime()) || date.getTime() === 0) return ''
 
   return dateFormatter.format(date)
 }

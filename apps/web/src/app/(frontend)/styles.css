@@ -68,6 +68,10 @@
     color: var(--color-accent);
   }
 
+  .article-related-posts {
+    padding-top: 2rem;
+  }
+
   .prose-article h2 {
     font-family: var(--font-serif);
     font-size: 1.5em;

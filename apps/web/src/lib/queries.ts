@@ -130,7 +130,7 @@ async function normalizePost(post: RemotePost, options: { includeRelated?: boole
 
     article.relatedPosts = await Promise.all(
       populatedRelatedPosts
-        .filter((relatedPost) => relatedPost.slug && relatedPost.id !== post.id && isValidDate(relatedPost.publishedAt))
+        .filter((relatedPost) => relatedPost.slug && relatedPost.id !== post.id)
         .slice(0, 3)
         .map((relatedPost) => normalizePost(relatedPost)),
     )
