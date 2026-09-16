@@ -49,6 +49,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               width={heroImage.width ?? 1600}
               height={heroImage.height ?? 900}
               priority
+              sizes="100vw"
               className="hero-carousel__image aspect-[3/1] w-full rounded-md object-cover sm:aspect-[46/10]"
             />
           )}
@@ -90,6 +91,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               alt={heroImage.alt}
               width={96}
               height={96}
+              sizes="96px"
               className="aspect-square w-20 shrink-0 rounded-md object-cover sm:w-24"
             />
           )}
@@ -108,6 +110,7 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
               alt={heroImage.alt}
               width={heroImage.width ?? 800}
               height={heroImage.height ?? 500}
+              sizes="(min-width: 640px) 40vw, 100vw"
               className="aspect-[16/10] w-full rounded-md object-cover"
             />
           </div>
