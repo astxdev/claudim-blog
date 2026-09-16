@@ -1,8 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import type { Article } from '@/payload-types'
-import { ArticleCard } from './ArticleCard'
+import { isPopulated } from '@/lib/relations'
+import { resolveMediaUrl } from '@/lib/cms-client'
+import { CategoryBadge } from './CategoryBadge'
 
 interface HeroCarouselProps {
   articles: Article[]
@@ -34,15 +38,40 @@ export function HeroCarousel({ articles }: HeroCarouselProps) {
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="hero-carousel__slides">
-        {articles.map((article, index) => (
-          <div
-            key={article.id}
-            aria-hidden={index !== activeIndex}
-            className={`hero-carousel__slide ${index === activeIndex ? 'hero-carousel__slide--active' : ''}`}
-          >
-            <ArticleCard article={article} variant="feature" />
-          </div>
-        ))}
+        {articles.map((article, index) => {
+          const imageSource = isPopulated(article.heroImage) ? article.heroImage : null
+          const imageUrl = resolveMediaUrl(imageSource?.url)
+          const category = isPopulated(article.category) ? article.category : null
+
+          return (
+            <div
+              key={article.id}
+              aria-hidden={index !== activeIndex}
+              className={`hero-carousel__slide ${index === activeIndex ? 'hero-carousel__slide--active' : ''}`}
+            >
+              {imageUrl && (
+                <Image
+                  src={imageUrl}
+                  alt={imageSource?.alt ?? article.title}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  className="hero-carousel__background object-cover"
+                />
+              )}
+              <div className="hero-carousel__shade" aria-hidden="true" />
+              <div className="hero-carousel__content">
+                <div className="max-w-4xl">
+                  {category && <CategoryBadge title={category.title} slug={category.slug} accentColor="#f2efe7" asLink={false} />}
+                  <Link href={category ? `/${category.slug}/${article.slug}` : '#'} className="group block">
+                    <h1 className="headline mt-3 text-3xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-6xl">{article.title}</h1>
+                    {article.dek && <p className="mt-4 max-w-3xl text-base text-white/85 sm:text-xl">{article.dek}</p>}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {articles.length > 1 && (

@@ -44,8 +44,9 @@ export default async function HomePage() {
           }),
         }}
       />
-      <div className="mx-auto max-w-6xl px-6 py-8">
       <HeroCarousel articles={slides} />
+
+      <div className="mx-auto max-w-6xl px-6 py-12">
 
       {/* Capa: coluna secundária + boletim, abaixo do carrossel principal */}
       <div className="divide-border grid gap-8 lg:grid-cols-12 lg:gap-x-10 lg:divide-x">

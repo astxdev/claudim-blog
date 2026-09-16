@@ -141,13 +141,20 @@
 
   .hero-carousel {
     position: relative;
+    height: calc(100svh - 15rem);
+    min-height: 32rem;
+    overflow: hidden;
+    background: var(--color-ink);
   }
 
   .hero-carousel__slides {
     position: relative;
+    height: 100%;
   }
 
   .hero-carousel__slide {
+    position: absolute;
+    inset: 0;
     display: none;
   }
 
@@ -156,28 +163,41 @@
     animation: hero-carousel-in 500ms ease both;
   }
 
-  .hero-carousel .hero-carousel__image {
-    aspect-ratio: 3 / 1;
+  .hero-carousel__background {
+    z-index: 0;
   }
 
-  @media (min-width: 40rem) {
-    .hero-carousel .hero-carousel__image {
-      aspect-ratio: 46 / 10;
-    }
+  .hero-carousel__shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(90deg, rgb(0 0 0 / 78%) 0%, rgb(0 0 0 / 43%) 42%, rgb(0 0 0 / 8%) 100%), linear-gradient(0deg, rgb(0 0 0 / 72%) 0%, transparent 58%);
+  }
+
+  .hero-carousel__content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: flex-end;
+    padding: clamp(2rem, 7vw, 6rem) max(1.5rem, calc((100vw - 72rem) / 2));
   }
 
   .hero-carousel__arrow {
     position: absolute;
-    top: clamp(6rem, 18vw, 14rem);
+    top: 50%;
     display: flex;
-    height: 2.5rem;
-    width: 2.5rem;
+    height: 3.5rem;
+    width: 3.5rem;
+    z-index: 3;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
-    background: rgb(0 64 57 / 85%);
-    color: var(--color-ink-inverse);
-    font-size: 1.5rem;
+    border: 2px solid rgb(255 255 255 / 80%);
+    background: rgb(255 255 255 / 94%);
+    color: var(--color-ink);
+    font-size: 2rem;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
     transform: translateY(-50%);
@@ -185,7 +205,8 @@
   }
 
   .hero-carousel__arrow:hover {
-    background: var(--color-ink);
+    background: white;
+    transform: translateY(-50%) scale(1.08);
   }
 
   .hero-carousel__arrow--prev {
@@ -198,22 +219,41 @@
 
   .hero-carousel__dots {
     display: flex;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    z-index: 3;
     justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
+    transform: translateX(-50%);
   }
 
   .hero-carousel__dot {
-    height: 0.5rem;
-    width: 0.5rem;
+    height: 0.6rem;
+    width: 0.6rem;
     border-radius: 9999px;
     background: var(--color-border);
     cursor: pointer;
   }
 
   .hero-carousel__dot--active {
-    width: 1.5rem;
-    background: var(--color-accent-strong);
+    width: 2rem;
+    background: white;
+  }
+
+  @media (max-width: 40rem) {
+    .hero-carousel {
+      height: calc(100svh - 12rem);
+      min-height: 28rem;
+    }
+
+    .hero-carousel__arrow {
+      height: 2.75rem;
+      width: 2.75rem;
+    }
+
+    .hero-carousel__arrow--prev { left: 0.75rem; }
+    .hero-carousel__arrow--next { right: 0.75rem; }
   }
 
   .homepage-editorial-section {
