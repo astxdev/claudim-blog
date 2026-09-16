@@ -156,6 +156,45 @@
     cursor: pointer;
   }
 
+  .newsletter-bar__form {
+    display: none;
+  }
+
+  .newsletter-bar__mobile-form {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .newsletter-bar__form {
+      position: absolute;
+      top: 50%;
+      right: max(1.5rem, calc((100vw - 72rem) / 2));
+      display: block;
+      width: min(30rem, 43%);
+      transform: translateY(-50%);
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .newsletter-bar--form-open .newsletter-bar__mobile-form {
+      display: block;
+    }
+
+    .newsletter-bar--form-open .newsletter-bar__form {
+      display: block;
+      padding: 0 1rem 1rem;
+    }
+
+    .newsletter-bar--form-open .sendpulse-newsletter .sp-element-container {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .newsletter-bar--form-open .sendpulse-newsletter .sp-button {
+      width: 100%;
+    }
+  }
+
   .hero-carousel {
     position: relative;
     height: calc(100svh - 15rem);

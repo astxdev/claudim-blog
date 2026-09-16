@@ -6,21 +6,22 @@ interface NewsletterFormProps {
 }
 
 export function NewsletterForm({ compact = false, idPrefix }: NewsletterFormProps) {
-  const formId = `sp-form-255263-${idPrefix}`
+  const formId = 'sp-form-255263'
+  const inputId = `${formId}-email-${idPrefix}`
   const buttonId = `sp-button-255263-${idPrefix}`
 
   return (
-    <div className={`sendpulse-newsletter ${compact ? 'sendpulse-newsletter--compact' : ''}`}>
+    <div className={`sp-form-outer sendpulse-newsletter ${compact ? 'sendpulse-newsletter--compact' : ''}`}>
       <div id={formId} sp-id="255263" sp-hash={SENDPULSE_FORM_ID} sp-lang="pt-br" className="sp-form sp-form-regular">
         <div className="sp-form-fields-wrapper">
           <div className="sp-message"><div /></div>
           <form noValidate className="sp-element-container sp-field-nolabel">
             <div className="sp-field">
-              <label className={compact ? 'sr-only' : ''} htmlFor={`${formId}-email`}>
+              <label className={compact ? 'sr-only' : ''} htmlFor={inputId}>
                 <span>Assine a newsletter</span><strong> *</strong>
               </label>
               <input
-                id={`${formId}-email`}
+                id={inputId}
                 type="email"
                 sp-type="email"
                 name="sform[email]"
