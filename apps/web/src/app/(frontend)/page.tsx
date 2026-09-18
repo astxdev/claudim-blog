@@ -110,7 +110,7 @@ export default async function HomePage() {
                 </div>
 
                 <div className="mt-6 grid gap-8 lg:grid-cols-12 lg:gap-10">
-                  <div className="lg:col-span-7">
+                  <div className="flex lg:col-span-7">
                     <ArticleCard article={lead} variant="feature" />
                   </div>
                   <div className="grid content-start gap-0 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">

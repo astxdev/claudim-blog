@@ -52,7 +52,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <span className="text-ink-muted text-sm">Leitura recomendada</span>
           </div>
           <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-7"><ArticleCard article={pinned} variant="feature" /></div>
+            <div className="flex lg:col-span-7"><ArticleCard article={pinned} variant="feature" /></div>
             <div className="flex flex-col lg:col-span-5">
               {secondary.map((article) => <ArticleCard key={article.id} article={article} variant="secondary" />)}
             </div>

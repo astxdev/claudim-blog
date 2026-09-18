@@ -40,18 +40,19 @@ export function ArticleCard({ article, variant = 'default' }: ArticleCardProps) 
   // texto abaixo em fluxo normal — sem overlay, sem gradiente por cima da imagem.
   if (variant === 'feature') {
     return (
-      <article>
-        <Link href={href} className="group block">
+      <article className="h-full">
+        <Link href={href} className="group flex h-full flex-col">
           {heroImage && (
-            <Image
-              src={heroImage.url}
-              alt={heroImage.alt}
-              width={heroImage.width ?? 1600}
-              height={heroImage.height ?? 900}
-              priority
-              sizes="100vw"
-              className="hero-carousel__image aspect-[3/1] w-full rounded-md object-cover sm:aspect-[46/10]"
-            />
+            <div className="relative aspect-square w-full flex-1 overflow-hidden rounded-md lg:aspect-auto">
+              <Image
+                src={heroImage.url}
+                alt={heroImage.alt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                className="object-cover"
+              />
+            </div>
           )}
           <div className="mt-4">
             {badge}
